@@ -1,0 +1,31 @@
+{
+  "name": "dewa-extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/ejcorpuz/dewa-extractor.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/ejcorpuz/dewa-extractor/issues"
+  },
+  "homepage": "https://gitlab.com/ejcorpuz/dewa-extractor#readme",
+  "dependencies": {
+    "axios": "^0.20.0",
+    "bluebird": "^3.7.2",
+    "cheerio": "^1.0.0-rc.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.20",
+    "node-datetime": "^2.1.2",
+    "phantom": "^6.3.0",
+    "puppeteer": "^5.3.0"
+  }
+}
