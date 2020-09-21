@@ -1,10 +1,10 @@
-FROM node:12.10.0-alpine
+FROM node:12.10.0-stretch
 
-ENV TZ=Asia/Dubai
-RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main'>> /etc/apk/repositories \
-	&& apk --update add curl
+RUN apt-get update
+RUN apt-get install -y supervisor
 
-RUN apk add --update supervisor && rm  -rf /tmp/* /var/cache/apk/*
+RUN apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+    && export TERM=xterm
 
 RUN mkdir -p /app
 ADD ./ /app
