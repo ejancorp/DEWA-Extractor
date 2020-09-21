@@ -1,17 +1,15 @@
-FROM node:12.10.0-stretch
+FROM node:12.10.0-alpine
 
-RUN apt-get update
-RUN apt-get install -y supervisor
+ENV TZ=Asia/Dubai
+RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main'>> /etc/apk/repositories \
+	&& apk --update add curl
 
-RUN apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
-    && export TERM=xterm
+RUN apk add --update supervisor && rm  -rf /tmp/* /var/cache/apk/*
 
 RUN mkdir -p /app
 ADD ./ /app
 WORKDIR /app
 
 COPY supervisord.conf /etc/supervisord.conf
-COPY ./entrypoint.sh /usr/bin/entrypoint.sh
-RUN chmod +x /usr/bin/entrypoint.sh
 
 CMD ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisord.conf"]
