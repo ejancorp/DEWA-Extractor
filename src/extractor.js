@@ -20,11 +20,6 @@ class DEWAExtractor {
       screenshot: false
     }, options);
 
-    admin.initializeApp({
-      credential: admin.credential.cert(require(this.options.database_credential_file)),
-      databaseURL: this.options.database_url
-    });
-
     this.db = admin.database();
     this.data = {};
 
@@ -32,6 +27,12 @@ class DEWAExtractor {
   }
 
   run() {
+
+    admin.initializeApp({
+      credential: admin.credential.cert(require(this.options.database_credential_file)),
+      databaseURL: this.options.database_url
+    });
+
     return this.fetch().then(() => {
       const dt = new Date().getTime();
       const result = _.extend(this.data, { datetime: dt });
