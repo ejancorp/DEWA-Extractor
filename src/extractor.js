@@ -20,7 +20,6 @@ class DEWAExtractor {
       screenshot: false
     }, options);
 
-    this.db = admin.database();
     this.data = {};
 
     this.logger = logger;
@@ -32,6 +31,8 @@ class DEWAExtractor {
       credential: admin.credential.cert(require(this.options.database_credential_file)),
       databaseURL: this.options.database_url
     });
+
+    this.db = admin.database();
 
     return this.fetch().then(() => {
       const dt = new Date().getTime();
