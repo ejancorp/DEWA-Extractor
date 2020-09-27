@@ -21,7 +21,6 @@ class DEWAExtractor {
     }, options);
 
     this.data = {};
-
     this.logger = logger;
   }
 
@@ -32,6 +31,7 @@ class DEWAExtractor {
       databaseURL: this.options.database_url
     });
 
+    this.data = {};
     this.db = admin.database();
 
     return this.fetch().then(() => {
