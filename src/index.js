@@ -27,7 +27,8 @@ const app = new Extractor({
   username: process.env.DEWA_USERNAME,
   password: process.env.DEWA_PASSWORD,
   database_url: process.env.FIREBASE_DB_URL,
-  database_credential_file: process.env.FIREBASE_CREDENTIAL_FILE
+  database_credential_file: process.env.FIREBASE_CREDENTIAL_FILE,
+  devmode: (process.env.NODE_ENV === 'production' ? false : true)
 }, logger);
 
 app.run().then(() => logger.info('Initial Run... Done...'));

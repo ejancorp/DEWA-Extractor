@@ -17,7 +17,8 @@ class DEWAExtractor {
       electricity_daily_button_xpath: '//*[@id="dvElectricity"]//ul//li[contains(.,"Daily")]',
       database_url: '',
       database_credential_file: '../credentials.json',
-      screenshot: false
+      screenshot: false,
+      devmode: true,
     }, options);
 
     this.data = {};
@@ -43,8 +44,21 @@ class DEWAExtractor {
     }).then(() => this.db.goOffline()).then(() => admin.app().delete());
   }
 
+  createBrowser() {
+    if (this.options.devmode) {
+
+      return puppeteer.launch();
+    }
+
+    return puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/chromium-browser',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+  }
+
   async fetch() {
-    const browser = await puppeteer.launch();
+    const browser = await this.createBrowser();
     const page = await browser.newPage();
 
     await page.goto(this.options.login_page, { waitUntil: 'networkidle2', timeout: 0 });
