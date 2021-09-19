@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const moment = require('moment');
-const admin = require('firebase-admin');
 
 class DEWAExtractor {
 
@@ -15,8 +14,6 @@ class DEWAExtractor {
       password_input_selector: '#form-field-login-main-password',
       login_button_selector: '#loginButton',
       electricity_daily_button_xpath: '//*[@id="dvElectricity"]//ul//li[contains(.,"Daily")]',
-      database_url: '',
-      database_credential_file: '../credentials.json',
       screenshot: false,
       devmode: true,
     }, options);
@@ -27,21 +24,14 @@ class DEWAExtractor {
 
   run() {
 
-    admin.initializeApp({
-      credential: admin.credential.cert(require(this.options.database_credential_file)),
-      databaseURL: this.options.database_url
-    });
-
     this.data = {};
-    this.db = admin.database();
 
     return this.fetch().then(() => {
       const dt = new Date().getTime();
       const result = _.extend(this.data, { datetime: dt });
 
-      this.db.ref(`history/${dt}`).set(result);
       this.logger.info(JSON.stringify(result));
-    }).then(() => this.db.goOffline()).then(() => admin.app().delete());
+    });
   }
 
   createBrowser() {
@@ -108,7 +98,6 @@ class DEWAExtractor {
   processDailyReadings(jsonResponse, params) {
     const entries = this.paramsToObject(params);
     const result = { data: jsonResponse.data, params: entries };
-    this.db.ref('readings/').set(result);
     this.data.readings = result;
   }
 
@@ -118,12 +107,10 @@ class DEWAExtractor {
       return _.extend(data, { name: utilityName });
     });
     const result = { series, meter: jsonResponse.meter };
-    this.db.ref('statistics/').set(result);
     this.data.statistics = result;
   }
 
   processBills(jsonResponse) {
-    this.db.ref('bills/').set(jsonResponse);
     this.data.bills = jsonResponse;
   }
 
@@ -138,7 +125,6 @@ class DEWAExtractor {
         period_formatted: moment(consumption.monthText, 'MMM YYYY').format('MMMM YYYY')
       }
     });
-    this.db.ref('consumption/').set(result);
     this.data.consumption = result;
   }
 
