@@ -46,7 +46,7 @@ app.run().then(() => logger.info('Initial Run... Done...'));
 
 const job = new CronJob('0 */6 * * *', () => {
   logger.info('STARTING CRON');
-  app.run().then(() => logger.info('ENDING CRON'));
+  app.run().then(() => logger.info('ENDING CRON')).catch(error => console.error(error));
 });
 
 job.start();
