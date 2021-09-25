@@ -44,8 +44,8 @@ class DEWAExtractor {
           return false;
         }
         return true;
-      });
-    });
+      }).catch(error => console.error(error));
+    }).catch(error => console.error(error));
   }
 
   createBrowser() {
