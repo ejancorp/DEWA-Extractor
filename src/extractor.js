@@ -1,7 +1,14 @@
-const puppeteer = require('puppeteer');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const moment = require('moment');
+
+const puppeteer = require('puppeteer-extra')
+
+// Add stealth plugin and use defaults 
+const pluginStealth = require('puppeteer-extra-plugin-stealth')
+const { executablePath } = require('puppeteer');
+
+puppeteer.use(pluginStealth()) 
 
 const Responses = require('./responses');
 
@@ -40,8 +47,9 @@ class DEWAExtractor {
 
   createBrowser() {
     return puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: executablePath()
     });
   }
 
@@ -56,6 +64,7 @@ class DEWAExtractor {
       document.querySelector(options.password_input_selector).value = options.password;
       document.querySelector(options.login_button_selector).click();
     }, this.options);
+
 
     page.on('response', response => this.processResponse(response));
 
