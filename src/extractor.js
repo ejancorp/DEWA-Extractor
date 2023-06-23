@@ -2,7 +2,8 @@ const puppeteer = require('puppeteer');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const moment = require('moment');
-const { Pool } = require('pg');
+
+const Responses = require('./responses');
 
 class DEWAExtractor {
 
@@ -16,18 +17,10 @@ class DEWAExtractor {
       login_button_selector: '#loginButton',
       electricity_daily_button_xpath: '//*[@id="dvElectricity"]//ul//li[contains(.,"Daily")]',
       screenshot: false,
-      devmode: true,
-      database_url: '',
     }, options);
 
     this.data = {};
     this.logger = logger;
-    this.pool = new Pool({
-      connectionString: this.options.database_url,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    });
   }
 
   run() {
@@ -38,22 +31,14 @@ class DEWAExtractor {
       const dt = new Date().getTime();
       const result = _.extend(this.data, { datetime: dt });
 
-      return this.pool.query(`INSERT into responses (response) VALUES ($1)`, [result], (error, _results) => {
-        this.logger.info(JSON.stringify(result));
-        if (error) {
-          return false;
-        }
-        return true;
+      return Responses.save(JSON.stringify(result)).then(() => {
+        return this.logger.info(JSON.stringify(result));
       }).catch(error => console.error(error));
+
     }).catch(error => console.error(error));
   }
 
   createBrowser() {
-    if (this.options.devmode) {
-
-      return puppeteer.launch();
-    }
-
     return puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
