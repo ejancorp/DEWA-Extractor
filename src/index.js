@@ -32,6 +32,7 @@ const logger = winston.createLogger({
 const app = new Extractor({
   username: process.env.DEWA_USERNAME,
   password: process.env.DEWA_PASSWORD,
+  chromepath: process.env.PUPPETEER_EXECUTABLE_PATH
 }, logger);
 
 app.run().then(() => logger.info('Initial Run... Done...'));
