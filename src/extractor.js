@@ -24,6 +24,7 @@ class DEWAExtractor {
       login_button_selector: '#loginButton',
       electricity_daily_button_xpath: '//*[@id="dvElectricity"]//ul//li[contains(.,"Daily")]',
       screenshot: false,
+      chromepath: false
     }, options);
 
     this.data = {};
@@ -49,7 +50,7 @@ class DEWAExtractor {
     return puppeteer.launch({
       headless: false,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: executablePath()
+      executablePath: this.options.chromepath || executablePath()
     });
   }
 
