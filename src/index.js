@@ -52,7 +52,13 @@ server.get('/', (_req, res) => {
     }).catch(err => {
       return reject(err);
     });
-  }).then(data => res.json(JSON.parse(data)))
+  }).then(data => {
+
+    let result = JSON.parse(data);
+    let consumption = result?.consumption || [{}];
+    result.current = consumption[0];
+    return res.json(result);
+  })
 });
 
 server.listen(port, '0.0.0.0', () => {
