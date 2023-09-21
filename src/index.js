@@ -46,15 +46,13 @@ const job = new CronJob('0 */6 * * *', () => {
 job.start();
 
 server.get('/', (_req, res) => {
-  console.log(_req);
   return new Promise((resolve, reject) => {
     return Responses.get().then(result => {
-      console.log(result);
       return resolve(result);
     }).catch(err => {
       return reject(err);
     });
-  }).then(data => res.json(data.response))
+  }).then(data => res.json(data))
 });
 
 server.listen(port, '0.0.0.0', () => {
