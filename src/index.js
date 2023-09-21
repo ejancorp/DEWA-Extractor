@@ -52,7 +52,7 @@ server.get('/', (_req, res) => {
     }).catch(err => {
       return reject(err);
     });
-  }).then(data => res.json(data))
+  }).then(data => res.json(JSON.parse(data)))
 });
 
 server.listen(port, '0.0.0.0', () => {
