@@ -55,6 +55,6 @@ server.get('/', (_req, res) => {
   }).then(data => res.json(data.response))
 });
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`App listening at http://localhost:${port}`)
 });
