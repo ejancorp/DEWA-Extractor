@@ -56,7 +56,17 @@ server.get('/', (_req, res) => {
 
     let result = JSON.parse(data);
     let consumption = result?.consumption || [{}];
+    let currentDay = new Date().getDate();
+    let previousDay = currentDay <= 1 ? 1 : currentDay - 1;
+    let dayIndex = previousDay - 1;
+
     result.current = consumption[0];
+    result.summary = {
+      latest: {
+        electricity: result.readings.data[dayIndex],
+      }
+    };
+
     return res.json(result);
   })
 });
