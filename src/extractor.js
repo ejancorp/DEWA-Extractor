@@ -23,12 +23,15 @@ class DEWAExtractor {
       password_input_selector: '#form-field-login-main-password',
       login_button_selector: '#loginButton',
       electricity_daily_button_xpath: '//*[@id="dvElectricity"]//ul//li[contains(.,"Daily")]',
+      water_daily_button_xpath: '//*[@id="dvWater"]//ul//li[contains(.,"Daily")]',
       screenshot: false,
       chromepath: false,
       headless: false
     }, options);
 
-    this.data = {};
+    this.data = {
+      readings: []
+    };
     this.logger = logger;
   }
 
@@ -75,10 +78,15 @@ class DEWAExtractor {
       timeout: 0
     });
 
-    const buttons = await page.$x(this.options.electricity_daily_button_xpath);
-    const button = _.first(buttons);
+    const electricityButtons = await page.$x(this.options.electricity_daily_button_xpath);
+    const electricityButton = _.first(electricityButtons);
+    electricityButton.click();
 
-    button.click();
+    await this.wait(3000);
+
+    const waterButtons = await page.$x(this.options.water_daily_button_xpath);
+    const waterButton = _.first(waterButtons);
+    waterButton.click();
 
     await this.wait(10000);
 
@@ -107,7 +115,7 @@ class DEWAExtractor {
   processDailyReadings(jsonResponse, params) {
     const entries = this.paramsToObject(params);
     const result = { data: jsonResponse.data, params: entries };
-    this.data.readings = result;
+    this.data.readings.push(result);
   }
 
   processStatistics(jsonResponse) {
