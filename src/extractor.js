@@ -37,7 +37,9 @@ class DEWAExtractor {
 
   run() {
 
-    this.data = {};
+    this.data = {
+      readings: []
+    };
 
     return this.fetch().then(() => {
       const dt = new Date().getTime();
