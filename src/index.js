@@ -102,11 +102,11 @@ server.get('/csv/electricity', (_req, res) => {
     const csv = csvStringifier.stringifyRecords(flatten);
 
     // Set response headers for CSV file download
-    res.setHeader('Content-disposition', 'attachment; filename=electricity.csv');
-    res.set('Content-Type', 'text/csv');
+    // res.setHeader('Content-disposition', 'attachment; filename=electricity.csv');
+    // res.set('Content-Type', 'text/csv');
 
     // Send the CSV as the response
-    return res.send(csv);
+    // return res.send(csv);
 
     return res.json(flatten);
   });
