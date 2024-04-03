@@ -94,24 +94,24 @@ class DEWAExtractor {
 
     await this.wait(3000);
 
-    await page.evaluate(async (data) => {
-      let electricityParams = data.readings.find(r => r.params.rtype === 'E').params;
+    await page.evaluate(async (self) => {
+      let electricityParams = self.data.readings.find(r => r.params.rtype === 'E').params;
       if (electricityParams) {
 
         let currentMonthNumber = Number(electricityParams.month);
-        let monthArray = this.buildArrayFromLastNumber(currentMonthNumber);
+        let monthArray = self.buildArrayFromLastNumber(currentMonthNumber);
 
         for (const item of monthArray) {
-          await fetch("/api/sitecore/graph/getreadings", Object.assign({}, this.getFetchDefaultParams(), {
-            body: this.objectToQueryString(Object.assign({}, electricityParams, {
+          await fetch("/api/sitecore/graph/getreadings", Object.assign({}, self.getFetchDefaultParams(), {
+            body: self.objectToQueryString(Object.assign({}, electricityParams, {
               month: String(item),
-              date: `${this.getMonthName(item)} ${electricityParams.year}`,
+              date: `${self.getMonthName(item)} ${electricityParams.year}`,
               custom: true
             }))
           }));
         }
       }
-    }, this.data);
+    }, this);
 
     await this.wait(10000);
 
