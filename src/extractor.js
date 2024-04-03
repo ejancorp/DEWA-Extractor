@@ -8,7 +8,7 @@ const puppeteer = require('puppeteer-extra')
 const pluginStealth = require('puppeteer-extra-plugin-stealth')
 const { executablePath } = require('puppeteer');
 
-puppeteer.use(pluginStealth()) 
+puppeteer.use(pluginStealth())
 
 const Responses = require('./responses');
 
@@ -30,7 +30,8 @@ class DEWAExtractor {
     }, options);
 
     this.data = {
-      readings: []
+      readings: [],
+      historical: [],
     };
     this.logger = logger;
   }
@@ -38,7 +39,8 @@ class DEWAExtractor {
   run() {
 
     this.data = {
-      readings: []
+      readings: [],
+      historical: [],
     };
 
     return this.fetch().then(() => {
@@ -90,6 +92,27 @@ class DEWAExtractor {
     const waterButton = _.first(waterButtons);
     waterButton.click();
 
+    await this.wait(3000);
+
+    await page.evaluate(async () => {
+      let electricityParams = this.data.readings.find(r => r.params.rtype === 'E').params;
+      if (electricityParams) {
+
+        let currentMonthNumber = Number(electricityParams.month);
+        let monthArray = this.buildArrayFromLastNumber(currentMonthNumber);
+
+        for (const item of monthArray) {
+          await fetch("/api/sitecore/graph/getreadings", Object.assign({}, this.getFetchDefaultParams(), {
+            body: this.objectToQueryString(Object.assign({}, electricityParams, {
+              month: String(item),
+              date: `${this.getMonthName(item)} ${electricityParams.year}`,
+              custom: true
+            }))
+          }));
+        }
+      }
+    });
+
     await this.wait(10000);
 
     if (this.options.screenshot) {
@@ -97,6 +120,66 @@ class DEWAExtractor {
     }
 
     await browser.close();
+  }
+
+  getFetchDefaultParams() {
+    return {
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+        "adrum": "isAjax:true",
+        "cache-control": "no-cache",
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "pragma": "no-cache",
+        "sec-ch-ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-requested-with": "XMLHttpRequest"
+      },
+      "body": this.objectToQueryString({}),
+      "method": "POST",
+      "referrer": "https://dewa.gov.ae/en/consumer/my-account/dashboard",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "mode": "cors",
+      "credentials": "include"
+    }
+  }
+
+  buildArrayFromLastNumber(lastNumber) {
+    if (lastNumber <= 0) {
+      return [];
+    }
+
+    const result = [];
+    for (let i = 1; i <= lastNumber; i++) {
+      result.push(i);
+    }
+    return result;
+  }
+
+  objectToQueryString(obj) {
+    const queryParams = [];
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const encodedKey = encodeURIComponent(key);
+        const encodedValue = encodeURIComponent(obj[key]);
+        queryParams.push(`${encodedKey}=${encodedValue}`);
+      }
+    }
+    return queryParams.join('&');
+  }
+
+  getMonthName(monthNumber) {
+    const months = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"];
+    if (monthNumber < 1 || monthNumber > 12) {
+      return "Invalid month number";
+    } else {
+      return months[monthNumber - 1];
+    }
   }
 
   processResponse(response) {
@@ -117,7 +200,11 @@ class DEWAExtractor {
   processDailyReadings(jsonResponse, params) {
     const entries = this.paramsToObject(params);
     const result = { data: jsonResponse.data, params: entries };
-    this.data.readings.push(result);
+    if (entries?.custom) {
+      this.data.historical.push(result);
+    } else {
+      this.data.readings.push(result);
+    }
   }
 
   processStatistics(jsonResponse) {
