@@ -45,6 +45,20 @@ const job = new CronJob('0 */6 * * *', () => {
 
 job.start();
 
+const dateDMYToEpochTimestampInSeconds = (dateString) => {
+  const parts = dateString.split('/');
+  if (parts.length !== 3) {
+    throw new Error('Invalid date format. Expected format: d/m/y');
+  }
+
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Months are zero-based in JavaScript
+  const year = parseInt(parts[2], 10);
+
+  const epochTimestampInSeconds = Date.UTC(year, month, day) / 1000;
+  return epochTimestampInSeconds;
+}
+
 server.get('/', (_req, res) => {
   return new Promise((resolve, reject) => {
     return Responses.get().then(result => {
@@ -70,6 +84,26 @@ server.get('/', (_req, res) => {
         electricity: result.readings.find(r => r.params.rtype === 'E')?.data.filter((_d, i) => (i <= dayIndex)).reduce((p, a) => p + a, 0),
         water: result.readings.find(r => r.params.rtype === 'W')?.data.filter((_d, i) => (i <= dayIndex)).reduce((p, a) => p + a, 0),
       }
+    };
+
+    result.reporting = {
+      electricity: result.historical.filter(h => h.params.rtype === 'E').map(h => {
+        return {
+          data: h.data.map((data, idx) => {
+            let day = idx + 1;
+            let dateString = `${day}/${h.params.month}/${h.params.year}`;
+            return {
+              timestamp: dateDMYToEpochTimestampInSeconds(dateString),
+              value: data
+            }
+          }),
+          labels: {
+            year: h.params.year,
+            month: h.params.month,
+            date: h.params.date,
+          }
+        }
+      }),
     };
 
     return res.json(result);
