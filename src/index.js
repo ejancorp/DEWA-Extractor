@@ -94,7 +94,7 @@ server.get('/', (_req, res) => {
             let dateString = `${day}/${h.params.month}/${h.params.year}`;
             return {
               timestamp: dateDMYToEpochTimestampInSeconds(dateString),
-              value: data
+              value: data || 0
             }
           }),
           labels: {
