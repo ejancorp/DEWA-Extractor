@@ -104,6 +104,23 @@ server.get('/', (_req, res) => {
           }
         }
       }),
+      water: result.historical.filter(h => h.params.rtype === 'W').map(h => {
+        return {
+          data: h.data.map((data, idx) => {
+            let day = idx + 1;
+            let dateString = `${day}/${h.params.month}/${h.params.year}`;
+            return {
+              timestamp: dateDMYToEpochTimestampInSeconds(dateString),
+              value: data || 0
+            }
+          }),
+          labels: {
+            year: h.params.year,
+            month: h.params.month,
+            date: h.params.date,
+          }
+        }
+      }),
     };
 
     return res.json(result);
