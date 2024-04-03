@@ -172,6 +172,23 @@ class DEWAExtractor {
           }));
         }
       }
+
+      let waterParams = data.readings.find(r => r.params.rtype === 'W').params;
+      if (waterParams) {
+
+        let currentMonthNumber = Number(waterParams.month);
+        let monthArray = buildArrayFromLastNumber(currentMonthNumber);
+
+        for (const item of monthArray) {
+          await fetch("/api/sitecore/graph/getreadings", Object.assign({}, getFetchDefaultParams(), {
+            body: objectToQueryString(Object.assign({}, waterParams, {
+              month: String(item),
+              date: `${getMonthName(item)} ${waterParams.year}`,
+              custom: true
+            }))
+          }));
+        }
+      }
     }, this.data);
 
     await this.wait(10000);
