@@ -63,7 +63,8 @@ server.get('/', (_req, res) => {
     result.current = consumption[0];
     result.summary = {
       latest: {
-        electricity: result.readings.data[dayIndex],
+        electricity: result.readings.find(r => r.params.rtype === 'E')?.data[dayIndex] || 0,
+        water: result.readings.find(r => r.params.rtype === 'W')?.data[dayIndex] || 0,
       }
     };
 
