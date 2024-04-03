@@ -96,6 +96,18 @@ server.get('/csv/electricity', (_req, res) => {
 
     let flatten = Object.assign({}, ...electricity.flat());
 
+    const csvStringifier = createObjectCsvStringifier(flatten);
+
+    // Convert data object to CSV string
+    const csv = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(data);
+
+    // Set response headers for CSV file download
+    res.setHeader('Content-disposition', 'attachment; filename=sample.csv');
+    res.set('Content-Type', 'text/csv');
+
+    // Send the CSV as the response
+    res.send(csv);
+
     return res.json(flatten);
   });
 });
