@@ -1,6 +1,7 @@
 const CronJob = require('cron').CronJob;
 const winston = require('winston');
 const express = require('express');
+const { createObjectCsvStringifier } = require('csv-writer');
 
 const Extractor = require('./extractor');
 const Responses = require('./responses');
@@ -58,6 +59,46 @@ const dateDMYToEpochTimestampInSeconds = (dateString) => {
   const epochTimestampInSeconds = Date.UTC(year, month, day) / 1000;
   return epochTimestampInSeconds;
 }
+
+server.get('/csv/electricity', (_req, res) => {
+  return new Promise((resolve, reject) => {
+    return Responses.get().then(result => {
+      return resolve(result);
+    }).catch(err => {
+      return reject(err);
+    });
+  }).then(data => {
+    let result = JSON.parse(data);
+
+    let electricity = result.historical.filter(h => h.params.rtype === 'E').map(h => {
+      return {
+        data: h.data.map((data, idx) => {
+          let day = idx + 1;
+          let dateString = `${day}/${h.params.month}/${h.params.year}`;
+          return {
+            timestamp: dateDMYToEpochTimestampInSeconds(dateString),
+            value: data || 0
+          }
+        }),
+        labels: {
+          year: h.params.year,
+          month: h.params.month,
+          date: h.params.date,
+        }
+      }
+    }).map(h => {
+      let obj = {};
+      h.data.forEach(d => {
+        obj[d.timestamp] = d.value;
+      });
+      return obj;
+    });
+
+    let flatten = electricity.flat();
+
+    return res.json(flatten);
+  });
+});
 
 server.get('/', (_req, res) => {
   return new Promise((resolve, reject) => {
