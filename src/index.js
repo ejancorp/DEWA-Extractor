@@ -65,6 +65,10 @@ server.get('/', (_req, res) => {
       latest: {
         electricity: result.readings.find(r => r.params.rtype === 'E')?.data[dayIndex] || 0,
         water: result.readings.find(r => r.params.rtype === 'W')?.data[dayIndex] || 0,
+      },
+      totals: {
+        electricity: result.readings.find(r => r.params.rtype === 'E')?.data.filter((_d, i) => (i <= dayIndex)).reduce((p, a) => p + a, 0),
+        water: result.readings.find(r => r.params.rtype === 'W')?.data.filter((_d, i) => (i <= dayIndex)).reduce((p, a) => p + a, 0),
       }
     };
 
