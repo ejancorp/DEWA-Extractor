@@ -94,7 +94,7 @@ server.get('/csv/electricity', (_req, res) => {
       return obj;
     });
 
-    let flatten = Object.fromEntries(electricity.flat());
+    let flatten = Object.assign({}, ...electricity.flat());
 
     return res.json(flatten);
   });
