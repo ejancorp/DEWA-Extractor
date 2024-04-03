@@ -94,8 +94,8 @@ class DEWAExtractor {
 
     await this.wait(3000);
 
-    await page.evaluate(async () => {
-      let electricityParams = this.data.readings.find(r => r.params.rtype === 'E').params;
+    await page.evaluate(async (data) => {
+      let electricityParams = data.readings.find(r => r.params.rtype === 'E').params;
       if (electricityParams) {
 
         let currentMonthNumber = Number(electricityParams.month);
@@ -111,7 +111,7 @@ class DEWAExtractor {
           }));
         }
       }
-    });
+    }, this.data);
 
     await this.wait(10000);
 
