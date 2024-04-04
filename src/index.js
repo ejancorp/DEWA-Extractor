@@ -105,8 +105,55 @@ server.get('/csv/electricity', (_req, res) => {
 
     // Send the CSV as the response
     return res.send(csv);
+  });
+});
 
-    return res.json(flatten);
+server.get('/csv/water', (_req, res) => {
+  return new Promise((resolve, reject) => {
+    return Responses.get().then(result => {
+      return resolve(result);
+    }).catch(err => {
+      return reject(err);
+    });
+  }).then(data => {
+    let result = JSON.parse(data);
+
+    let water = result.historical.filter(h => h.params.rtype === 'W').map(h => {
+      return {
+        data: h.data.map((data, idx) => {
+          let day = idx + 1;
+          let dateString = `${day}/${h.params.month}/${h.params.year}`;
+          return {
+            timestamp: dateDMYToEpochTimestampInSeconds(dateString),
+            value: data || 0
+          }
+        }),
+        labels: {
+          year: h.params.year,
+          month: h.params.month,
+          date: h.params.date,
+        }
+      }
+    }).map(h => {
+      let obj = {};
+      h.data.forEach(d => {
+        obj[d.timestamp] = d.value;
+      });
+      return obj;
+    });
+
+    let flatten = Object.assign({}, ...water.flat());
+
+    const csv = Object.entries(flatten)
+    .map(([timestamp, value]) => `${timestamp},${value}`)
+    .join('\n');
+
+    // Set response headers for CSV file download
+    res.setHeader('Content-disposition', 'attachment; filename=water.csv');
+    res.set('Content-Type', 'text/csv');
+
+    // Send the CSV as the response
+    return res.send(csv);
   });
 });
 
