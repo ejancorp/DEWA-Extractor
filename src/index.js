@@ -1,7 +1,6 @@
 const CronJob = require('cron').CronJob;
 const winston = require('winston');
 const express = require('express');
-const { createObjectCsvStringifier } = require('csv-writer');
 
 const Extractor = require('./extractor');
 const Responses = require('./responses');
@@ -96,17 +95,16 @@ server.get('/csv/electricity', (_req, res) => {
 
     let flatten = Object.assign({}, ...electricity.flat());
 
-    const csvStringifier = createObjectCsvStringifier({ header: [] });
-
-    // Convert data object to CSV string
-    const csv = csvStringifier.stringifyRecords(flatten);
+    const csv = Object.entries(flatten)
+    .map(([timestamp, value]) => `${timestamp},${value}`)
+    .join('\n');
 
     // Set response headers for CSV file download
-    // res.setHeader('Content-disposition', 'attachment; filename=electricity.csv');
-    // res.set('Content-Type', 'text/csv');
+    res.setHeader('Content-disposition', 'attachment; filename=electricity.csv');
+    res.set('Content-Type', 'text/csv');
 
     // Send the CSV as the response
-    // return res.send(csv);
+    return res.send(csv);
 
     return res.json(flatten);
   });
